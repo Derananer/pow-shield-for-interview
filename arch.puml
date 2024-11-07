@@ -1,0 +1,44 @@
+@startuml
+title PoW Shield Server Architecture
+
+participant "Client" as client
+box "PoW Shield Server" #LightBlue
+participant "TCP Server\n:8080" as tcp
+participant "PoW Validator" as pow
+participant "Fiber Server\n:3000" as fiber
+end box
+
+client -> tcp: TCP Connection
+activate tcp
+
+tcp -> pow: HandleTCPConnection
+activate pow
+
+alt Valid PoW
+    pow -> fiber: Forward Request
+    activate fiber
+    fiber --> pow: Response (Quote)
+    deactivate fiber
+    pow --> tcp: Forward Response
+else Invalid PoW
+    pow --> tcp: Reject Connection
+end
+
+tcp --> client: Response
+deactivate tcp
+deactivate pow
+
+note right of fiber
+  Fiber server handles:
+  - /quote endpoint
+  - Returns random quotes
+end note
+
+note right of pow
+  PoW Validator:
+  - Difficulty: 3
+  - Validates proof of work
+  - Forwards valid requests
+end note
+
+@enduml

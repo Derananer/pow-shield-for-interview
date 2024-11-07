@@ -1,12 +1,9 @@
 package powshield
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"net"
-	"strconv"
 	"strings"
 	"time"
 
@@ -19,21 +16,7 @@ type PoWConfig struct {
 	Difficulty int
 }
 
-// GenerateNonce creates a random nonce for the PoW challenge
-func GenerateNonce() string {
-	return strconv.Itoa(rng.Intn(1000000))
-}
-
-// performPoW checks if the solution satisfies the PoW difficulty
-func performPoW(nonce, solution string, difficulty int) bool {
-	data := nonce + solution
-	hash := sha256.Sum256([]byte(data))
-	hashStr := hex.EncodeToString(hash[:])
-	prefix := strings.Repeat("0", difficulty)
-	return strings.HasPrefix(hashStr, prefix)
-}
-
-// forwardConnection forwards data between two TCP connections (client <-> Fiber)
+// forwardConnection forwards data between two TCP connections (client <-> Fiberapp)
 func forwardConnection(clientConn, fiberConn net.Conn) {
 	defer clientConn.Close()
 	defer fiberConn.Close()
@@ -58,26 +41,24 @@ func HandleTCPConnection(conn net.Conn, config PoWConfig, fiberAddress string) {
 
 	// Step 2: Read and verify the solution
 	buffer := make([]byte, 1024)
+	conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 	n, err := conn.Read(buffer)
 	if err != nil {
-		fmt.Println("Failed to read solution:", err)
+		fmt.Printf("Failed to read solution: %s , buffer: %s\n", err, string(buffer[:n]))
 		return
 	}
 	clientSolution := strings.TrimSpace(string(buffer[:n]))
 
-	if performPoW(nonce, clientSolution, config.Difficulty) {
-		// Notify client that they passed the challenge
+	if CheckSolution(nonce, clientSolution, config.Difficulty) {
 		_, _ = conn.Write([]byte("OK\n"))
 		fmt.Println("PoW validated. Forwarding connection to Fiber app")
 
-		// Connect to Fiber server
 		fiberConn, err := net.Dial("tcp", fiberAddress)
 		if err != nil {
 			fmt.Println("Failed to connect to Fiber server:", err)
 			return
 		}
 
-		// Forward data between client and Fiber server
 		forwardConnection(conn, fiberConn)
 	} else {
 		_, _ = conn.Write([]byte("Invalid PoW solution\n"))

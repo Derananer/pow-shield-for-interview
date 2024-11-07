@@ -25,32 +25,20 @@ func GetRandomQuote() string {
 }
 
 func main() {
-
-	// Initialize Fiber app
-	app := fiber.New()
-
-	// Handle all incoming requests to the root
-	app.Get("/quote", func(c *fiber.Ctx) error {
-		return c.SendString(GetRandomQuote())
-	})
-	// PoW difficulty level
-	config := powshield.PoWConfig{Difficulty: 4}
-
-	// Fiber app address to forward connections to
-	fiberAddress := "localhost:3000" // Fiber server running on port 3000
+	config := powshield.PoWConfig{Difficulty: 3}
+	fiberAddress := "localhost:3000"
 
 	// Start TCP server for PoW validation
-	listener, err := net.Listen("tcp", ":8081")
+	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		fmt.Println("Failed to start TCP server:", err)
 		return
 	}
 	defer listener.Close()
-	fmt.Println("TCP server started on :8081")
+	fmt.Println("TCP server started on :8080")
 
 	go func() {
 		for {
-			// Accept incoming TCP connections
 			conn, err := listener.Accept()
 			if err != nil {
 				fmt.Println("Failed to accept connection:", err)
@@ -61,6 +49,11 @@ func main() {
 			go powshield.HandleTCPConnection(conn, config, fiberAddress)
 		}
 	}()
+
+	app := fiber.New()
+	app.Get("/quote", func(c *fiber.Ctx) error {
+		return c.SendString(GetRandomQuote())
+	})
 
 	err = app.Listen(":3000")
 	if err != nil {
