@@ -18,7 +18,8 @@ Scrypt was chosen as the proof-of-work algorithm because:
 
 - It is designed to be computationally expensive and memory-intensive
 - It is configurable and allows to tune the difficulty flexibly
-- Makes it much harder to solve quickly on specialized hardware like GPUs or ASICs
+- In future mechanism can be improved by using module for decision trusted and untrusted clients by checking IP address and request rate and we can use less CPU and memory for proof-of-work verification for trusted clients, to decrease the load on client side.
+- Makes it much harder to solve quickly on specialized hardware like GPUs or ASICs because it requires more memory to compute the hash
 - Provides strong protection against parallel brute-force attacks
 - Well-tested and cryptographically secure
 
@@ -34,7 +35,3 @@ Scrypt was chosen as the proof-of-work algorithm because:
 ```bash
 docker-compose up --build
 ```
-
-## Usage
-
-Protected endpoints will require a valid proof-of-work solution in the request headers. See the API documentation for details on implementing client-side proof-of-work calculations.
