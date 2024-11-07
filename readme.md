@@ -18,7 +18,7 @@ Scrypt was chosen as the proof-of-work algorithm because:
 
 - It is designed to be computationally expensive and memory-intensive
 - It is configurable and allows to tune the difficulty flexibly
-- In future mechanism can be improved by using module for decision trusted and untrusted clients by checking IP address and request rate and we can use less CPU and memory for proof-of-work verification for trusted clients, to decrease the load on client side.
+- In future mechanism can be improved by using module for decision trusted and untrusted clients by checking IP address and request rate and we can use less CPU and memory for proof-of-work verification for trusted clients, to decrease the load on client side. (Example: [AI_Adaptive_POW](https://www.sciencedirect.com/science/article/pii/S2665963822000604))
 - Makes it much harder to solve quickly on specialized hardware like GPUs or ASICs because it requires more memory to compute the hash
 - Provides strong protection against parallel brute-force attacks
 - Well-tested and cryptographically secure
